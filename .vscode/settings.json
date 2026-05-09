@@ -1,0 +1,18 @@
+{
+  "cSpell.words": [
+    "autoflush",
+    "ecommerce",
+    "Excetpion",
+    "fastapi",
+    "joinedload",
+    "MYSECRETKEY",
+    "ntext",
+    "passwrod",
+    "sessionmaker",
+    "vetry",
+    "yscrollcommand"
+  ],
+  "python.analysis.extraPaths": [
+    "./backend"
+  ]
+}
