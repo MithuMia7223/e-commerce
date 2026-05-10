@@ -15,7 +15,7 @@ class UserCreate(BaseModel):
 
 
 class LoginSchema(BaseModel):
-    email: str
+    username_or_email: str
     password: str
 
 
@@ -26,13 +26,13 @@ class ProductCreate(BaseModel):
 
 
 class CartCreate(BaseModel):
-    user_id: int
     product_id: int
+    quantity: int = 1
 
 
 class OrderCreate(BaseModel):
     user_id: int
-    product_id: int
+    quantity: int
 
 
 class CommentCreate(BaseModel):

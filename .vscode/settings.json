@@ -1,6 +1,7 @@
 {
   "cSpell.words": [
     "autoflush",
+    "dotenv",
     "ecommerce",
     "Excetpion",
     "fastapi",

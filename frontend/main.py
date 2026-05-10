@@ -14,7 +14,7 @@ class ECommerceApp:
         self.style = Style(theme="cosmo")
 
         # API base URL
-        self.api_base = "http://localhost:8002"
+        self.api_base = "http://localhost:8000"
 
         # User session
         self.token = None
@@ -208,14 +208,20 @@ class ECommerceApp:
 
     def load_products(self):
         search_term = self.search_entry.get() if hasattr(self, "search_entry") else ""
+
         try:
             headers = {"Authorization": f"Bearer {self.token}"}
+
             response = requests.get(
-                f"{self.api_base}/products/?search={search_term}", headers=headers
+                f"{self.api_base}/products/",
+                headers=headers
             )
+
             if response.status_code == 200:
-                products = response.json()["products"]
+                products = response.json()   
+
                 self.products_tree.delete(*self.products_tree.get_children())
+
                 for product in products:
                     self.products_tree.insert(
                         "",
@@ -223,16 +229,16 @@ class ECommerceApp:
                         iid=str(product["id"]),
                         values=(
                             product["name"],
-                            f"${product['price']}",
+                            product["price"],
                             product["stock"],
-                            product.get("category", ""),
-                        ),
+                            product.get("category", "")
+                        )
                     )
             else:
                 messagebox.showerror("Error", "Failed to load products")
-        except Exception as e:
-            messagebox.showerror("Error", f"Connection error: {str(e)}")
 
+        except Exception as e:
+           messagebox.showerror("Error", str(e))
     def add_to_cart(self):
         selected = self.products_tree.selection()
         if not selected:
@@ -396,3 +402,5 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = ECommerceApp(root)
     root.mainloop()
+
+    
