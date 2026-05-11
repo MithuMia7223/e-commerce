@@ -1,10 +1,34 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from .db import engine
-from . import models
-from .websocket import manager
+import sys
+import os
 
-from .routers import user, product, cart, order, comments, likes, notifications, admin
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from db import engine
+import models
+from websocket import manager
+
+from routers import (
+    user,
+    product,
+    cart,
+    order,
+    comments,
+    likes,
+    notifications,
+    admin,
+    wishlist,
+    review,
+    rating,
+    category,
+    shipping,
+    coupons,
+    variants,
+    refunds,
+    analytics,
+    profile,
+)
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -19,6 +43,16 @@ app.include_router(comments.router)
 app.include_router(likes.router)
 app.include_router(notifications.router)
 app.include_router(admin.router)
+app.include_router(wishlist.router)
+app.include_router(review.router)
+app.include_router(rating.router)
+app.include_router(category.router)
+app.include_router(shipping.router)
+app.include_router(coupons.router)
+app.include_router(variants.router)
+app.include_router(refunds.router)
+app.include_router(analytics.router)
+app.include_router(profile.router)
 
 
 @app.get("/")

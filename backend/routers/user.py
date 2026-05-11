@@ -2,50 +2,39 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from jose import jwt
 
-from .. import models, schemas, auth
+import models, schemas, auth
 
-from ..db import get_db
-from ..oauth2 import verify_token
+from db import get_db
+from oauth2 import verify_token
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+@router.post("/register", status_code=201)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
-    existing_email = (
-        db.query(models.User).filter(models.User.email == user.email).first()
+    existing_user = (
+        db.query(models.User)
+        .filter(
+            (models.User.username == user.username) | (models.User.email == user.email)
+        )
+        .first()
     )
 
-    if existing_email:
-        raise HTTPException(status_code=400, detail="Email already exists")
-
-    existing_username = (
-        db.query(models.User).filter(models.User.username == user.username).first()
-    )
-
-    if existing_username:
-        raise HTTPException(status_code=400, detail="Username already exists")
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username or Email already exists")
 
     hashed_password = auth.hash_password(user.password)
 
     new_user = models.User(
-        username=user.username, email=user.email, password=hashed_password, role="user"
+        username=user.username, email=user.email, password=hashed_password
     )
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
-    return {
-        "message": "User registered successfully",
-        "user": {
-            "id": new_user.id,
-            "username": new_user.username,
-            "email": new_user.email,
-            "role": new_user.role,
-        },
-    }
+    return {"message": "User created successfully"}
 
 
 @router.post("/login")

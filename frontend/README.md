@@ -28,3 +28,5 @@ python main.py
 - Python 3.7+
 - ttkbootstrap
 - requests
+
+

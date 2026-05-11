@@ -1,34 +1,75 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from .. import models
+import models
+from db import get_db
+from oauth2 import verify_token
 
-from ..db import get_db
-
-router = APIRouter(
-    prefix="/likes",
-    tags=["Likes"]
-)
+router = APIRouter(prefix="/likes", tags=["Likes"])
 
 
-@router.post("/{product_id}/{user_id}")
+# =========================
+# LIKE PRODUCT
+# =========================
+@router.post("/{product_id}")
 def like_product(
-    product_id: int,
-    user_id: int,
-    db: Session = Depends(get_db)
+    product_id: int, db: Session = Depends(get_db), user=Depends(verify_token)
 ):
 
-    item = models.Like(
-        user_id=user_id,
-        product_id=product_id
+    product = db.query(models.Product).filter(models.Product.id == product_id).first()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    existing_like = (
+        db.query(models.Like)
+        .filter(models.Like.user_id == user.id, models.Like.product_id == product_id)
+        .first()
     )
 
-    db.add(item)
+    if existing_like:
+        raise HTTPException(status_code=400, detail="Already liked")
+
+    like = models.Like(user_id=user.id, product_id=product_id)
+
+    db.add(like)
     db.commit()
 
-    return {
-        "message": "Product liked"
-    }
+    return {"message": "Liked successfully"}
+
+
+# =========================
+# UNLIKE PRODUCT (NEW FEATURE)
+# =========================
+@router.delete("/{product_id}")
+def unlike_product(
+    product_id: int, db: Session = Depends(get_db), user=Depends(verify_token)
+):
+
+    like = (
+        db.query(models.Like)
+        .filter(models.Like.user_id == user.id, models.Like.product_id == product_id)
+        .first()
+    )
+
+    if not like:
+        raise HTTPException(status_code=404, detail="Like not found")
+
+    db.delete(like)
+    db.commit()
+
+    return {"message": "Unlike successfully"}
+
+
+# =========================
+# GET LIKES (USER)
+# =========================
+@router.get("/me")
+def my_likes(db: Session = Depends(get_db), user=Depends(verify_token)):
+
+    likes = db.query(models.Like).filter(models.Like.user_id == user.id).all()
+
+    return likes
 
 
 @router.get("/")

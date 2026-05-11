@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 import os
 
-from .db import get_db
-from . import models, schemas
+from db import get_db
+import models, schemas
 
 # Load environment variables
 load_dotenv()
@@ -30,8 +30,8 @@ def verify_password(plain_password, hashed_password):
 
 
 def hash_password(password: str):
-    if len(password) > 72:
-        password = password[:72]
+    # Truncate password to 72 characters max for bcrypt
+    password = password[:72]
     return pwd_context.hash(password)
 
 
